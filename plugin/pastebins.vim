@@ -11,11 +11,45 @@ function! s:get_visual_selection()
     return join(lines, "\n")
 endfunction
 
-
-function! s:post_text_visual()
-    let text = get_visual_selection()
+function s:get_config()
+    let selected = g:enabled_pastebin_service
+    if has_key(g:pastebin_services, selected)==1
+        let options = g:pastebin_services[selected]
+        return options
+    else
+        echo "No such service"
+        return {}
+    endif
 endfunction
 
+function Post_text_visual()
+    let selected = s:get_visual_selection()
+
+    let config = s:get_config()
+
+    let file_type = &filetype
+    " Invalid service name
+    if config=={}
+        return
+    endif
+
+    " Invalid selection
+    if strlen(selected)==0
+        echo "Error: No text selected"
+        return
+    endif
+
+    let content = "content=" . selected
+    let syntax_string = config["syntax"] . "=" . file_type
+
+    let command = 'curl -s -F ' . '"' . content . '" '
+        \ . "-F " . syntax_string . " "
+        \ . config["url"]
+    let result = system(command)
+
+    echo result
+endfunction
 
 function! s:post_text_diff()
+
 endfunction
