@@ -125,4 +125,4 @@ function s:load_saved_pastes()
 endfunction
 
 execute "command! PastebinPaste :call s:post_text_visual()"
-execute "command! PastebinOpenSaved :call s:load_saved_pastes()"
+execute "command! PastebinPasteList :call s:load_saved_pastes()"
