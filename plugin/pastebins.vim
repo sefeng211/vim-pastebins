@@ -18,7 +18,8 @@ def read_pastes():
         print(f.readlines())
 
 def save_pastes(link):
-    with open(STORED_PASTES, 'a') as f:
+    path = vim.eval("expand('<sfile>:p:h')") + "/"
+    with open(path + STORED_PASTES, 'a') as f:
         f.write(link)
         f.write("\n");
 
