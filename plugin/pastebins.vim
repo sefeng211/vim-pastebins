@@ -118,10 +118,18 @@ function s:post_text_visual()
 endfunction
 
 function s:load_saved_pastes()
+    if exists("g:pastebin_paste_list_on")
+        if g:pastebin_paste_list_on==1
+            pc
+            let g:pastebin_paste_list_on=0
+            return
+        endif
+    endif
     py3 read_pastes()
     let l:path = s:path . "/../" . "data/_links_output.txt"
     let command = "botr pedit +:setl\\ autoread\ " . fnameescape(l:path)
     execute command
+    let g:pastebin_paste_list_on=1
 endfunction
 
 execute "command! PastebinPaste :call s:post_text_visual()"
