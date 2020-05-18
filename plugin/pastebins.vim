@@ -18,7 +18,7 @@ def read_pastes():
         print(f.readlines())
 
 def save_pastes(link):
-    path = vim.eval("expand('<sfile>:p:h')") + "/"
+    path = vim.eval("s:path") + "/" + "../"
     with open(path + STORED_PASTES, 'a') as f:
         f.write(link)
         f.write("\n");
@@ -56,6 +56,8 @@ def post_text():
         print("Failed to post the selection")
         print(e)
 EOF
+
+let s:path = expand('<sfile>:p:h')
 
 " Credit of this function: https://stackoverflow.com/a/6271254
 function! s:get_visual_selection()
