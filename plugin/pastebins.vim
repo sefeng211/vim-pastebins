@@ -2,6 +2,7 @@ py3 << EOF
 import vim
 from urllib import request, parse
 
+STORED_PASTES = "data/_links.txt"
 # There are filetypes that are not supported by certain pastebin services,
 # in such cases, we'd need to convert the filetype to a different one
 def get_file_type(config):
@@ -11,6 +12,15 @@ def get_file_type(config):
         if file_type in config["filetype"]:
            return config["file_type"][file_type]
     return file_type
+
+def read_pastes():
+    with open(STORED_PASTES, 'r') as f:
+        print(f.readlines())
+
+def save_pastes(link):
+    with open(STORED_PASTES, 'a') as f:
+        f.write(link)
+        f.write("\n");
 
 def post_text():
     service = vim.eval("g:enabled_pastebin_service")
@@ -38,7 +48,9 @@ def post_text():
     req =  request.Request(url, data=data)
     try:
         resp = request.urlopen(req)
-        print(resp.read())
+        link = resp.read().decode("utf-8")
+        save_pastes(link)
+        print(link)
     except Exception as e:
         print("Failed to post the selection")
         print(e)
