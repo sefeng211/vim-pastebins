@@ -1,3 +1,49 @@
+py3 << EOF
+import vim
+from urllib import request, parse
+
+# There are filetypes that are not supported by certain pastebin services,
+# in such cases, we'd need to convert the filetype to a different one
+def get_file_type(config):
+    file_type = vim.eval("&filetype")
+
+    if "filetype" in config:
+        if file_type in config["filetype"]:
+           return config["file_type"][file_type]
+    return file_type
+
+def post_text():
+    service = vim.eval("g:enabled_pastebin_service")
+    content = vim.eval("s:get_visual_selection()")
+    config = vim.eval("g:pastebin_services")
+
+    try:
+        config = config[service]
+    except KeyError:
+        print("Invalid service name is provided")
+        return
+
+    if not content:
+        print("Invalid selection")
+        return
+
+    url = config["url"]
+    syntax_field = config["syntax"]
+    data = {
+        "content": content,
+        syntax_field: get_file_type(config)
+    }
+
+    data = parse.urlencode(data).encode()
+    req =  request.Request(url, data=data)
+    try:
+        resp = request.urlopen(req)
+        print(resp.read())
+    except Exception as e:
+        print("Failed to post the selection")
+        print(e)
+EOF
+
 " Credit of this function: https://stackoverflow.com/a/6271254
 function! s:get_visual_selection()
     " Why is this not a built-in Vim script function?!
@@ -12,61 +58,12 @@ function! s:get_visual_selection()
     return join(lines, "\n")
 endfunction
 
-function s:get_config()
-    let selected = g:enabled_pastebin_service
-    if has_key(g:pastebin_services, selected)==1
-        let options = g:pastebin_services[selected]
-        return options
-    else
-        echo "No such service"
-        return {}
+function s:post_text_visual()
+    if !has("python3")
+        echo "vim has to be compiled with +python3 to run PastebinPaste"
+        finish
     endif
+    py3 post_text()
 endfunction
 
-" There are filetypes that are not supported by certain pastebin services,
-" in such cases, we need to change the filetype to a different one
-function s:get_file_type(config)
-    let file_type = &filetype
-    if has_key(a:config, "filetype")
-        let provided_filetype = a:config["filetype"]
-        echo provided_filetype
-        if has_key(provided_filetype, file_type)==1
-            return provided_filetype[file_type]
-        endif
-    endif
-    return file_type
-endfunction
-
-" Format the selection by adding escape character to the selection
-function s:format_selection(selection)
-    return substitute(a:selection, '"', '\\"', "g")
-endfunction
-
-function Post_text_visual()
-    let selected = s:get_visual_selection()
-    " Invalid selection
-    if strlen(selected)==0
-        echo "Error: No text selected"
-        return
-    endif
-
-    let formated = s:format_selection(selected)
-
-    let config = s:get_config()
-
-    let file_type = s:get_file_type(config)
-    " Invalid service name
-    if config=={}
-        return
-    endif
-
-    let content = "content=" . formated
-    let syntax_string = config["syntax"] . "=" . file_type
-
-    let command = 'curl -s -F ' . '"' . content . '" '
-        \ . "-F " . syntax_string . " "
-        \ . config["url"]
-    let result = system(command)
-
-    echo result
-endfunction
+execute "command! PastebinPaste :call s:post_text_visual()"
