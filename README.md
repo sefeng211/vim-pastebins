@@ -1,6 +1,6 @@
 Vim PasteBins
 =============
-A vim plugin that helps you to use pastebin services.
+A vim plugin that helps you to use pastebin services, inspired by [webpaste.el](https://github.com/etu/webpaste.el).
 
 Requirement
 -----------
@@ -9,6 +9,7 @@ Requirement
 Supported Feature
 -----------------
 - Paste current visual selection
+- List previously posted pastes
 
 Supported Pastebin Service
 --------------------------
@@ -17,9 +18,12 @@ Supported Pastebin Service
 
 Usage
 -----
-- Paste visual selection
+- Paste Visual Selection
 `xnoremap <leader>ps :<C-U>PastebinPaste<cr>` - `<C-U>` is required to clear
 the `'<,'>` from the command.
+
+- List Previous Posted Pastes
+`nnoremap <leader>pl :PastebinPasteList<cr>`
 
 Customization
 -------------
