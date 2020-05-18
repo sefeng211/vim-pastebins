@@ -1,3 +1,4 @@
+" Credit of this function: https://stackoverflow.com/a/6271254
 function! s:get_visual_selection()
     " Why is this not a built-in Vim script function?!
     let [line_start, column_start] = getpos("'<")[1:2]
@@ -22,24 +23,44 @@ function s:get_config()
     endif
 endfunction
 
+" There are filetypes that are not supported by certain pastebin services,
+" in such cases, we need to change the filetype to a different one
+function s:get_file_type(config)
+    let file_type = &filetype
+    if has_key(a:config, "filetype")
+        let provided_filetype = a:config["filetype"]
+        echo provided_filetype
+        if has_key(provided_filetype, file_type)==1
+            return provided_filetype[file_type]
+        endif
+    endif
+    return file_type
+endfunction
+
+" Format the selection by adding escape character to the selection
+function s:format_selection(selection)
+    return substitute(a:selection, '"', '\\"', "g")
+endfunction
+
 function Post_text_visual()
     let selected = s:get_visual_selection()
-
-    let config = s:get_config()
-
-    let file_type = &filetype
-    " Invalid service name
-    if config=={}
-        return
-    endif
-
     " Invalid selection
     if strlen(selected)==0
         echo "Error: No text selected"
         return
     endif
 
-    let content = "content=" . selected
+    let formated = s:format_selection(selected)
+
+    let config = s:get_config()
+
+    let file_type = s:get_file_type(config)
+    " Invalid service name
+    if config=={}
+        return
+    endif
+
+    let content = "content=" . formated
     let syntax_string = config["syntax"] . "=" . file_type
 
     let command = 'curl -s -F ' . '"' . content . '" '
@@ -48,8 +69,4 @@ function Post_text_visual()
     let result = system(command)
 
     echo result
-endfunction
-
-function! s:post_text_diff()
-
 endfunction

@@ -1,9 +1,12 @@
 let g:pastebin_services = {
-  \   "dpaste": {
-  \     "url": "http://dpaste.com/api/v2", "syntax": "syntax"
-  \   },
   \   "mozilla": {
   \     "url": "https://paste.mozilla.org/api/", "syntax": "lexer",
+  \   },
+  \   "dpaste.org": {
+  \     "url": "https://dpaste.org/api/", "syntax": "lexer",
+  \     "filetype": {
+  \       "cpp": "c",
+  \     }
   \   }
   \ }
 

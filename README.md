@@ -1,6 +1,6 @@
 Vim PasteBins
 =============
-A vim plugin that helps you using pastebin services.
+A vim plugin that helps you to use pastebin services.
 
 Supported Feature
 -----------------
@@ -10,7 +10,7 @@ Supported Feature
 Supported Pastebin Service
 --------------------------
 - [Mozilla Paste](paste.mozilla.org)
-- [dpaste.com](http://dpaste.com)
+- [dpaste.org](https://dpaste.org/)
 
 
 
