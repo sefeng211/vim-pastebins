@@ -1,4 +1,4 @@
-Vim PasteBins
+Vim Pastebins
 =============
 A vim plugin that helps you to use pastebin services, inspired by [webpaste.el](https://github.com/etu/webpaste.el).
 
@@ -29,5 +29,4 @@ Customization
 -------------
 - Change the service provider
 `let g:enabled_pastebin_service = "mozilla"`
-
 

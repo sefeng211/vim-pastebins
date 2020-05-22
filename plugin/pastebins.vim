@@ -6,7 +6,8 @@ from datetime import datetime
 from urllib import request, parse
 
 STORED_PASTES = "data/_links.txt"
-STORED_PASTES_OUTPUT = "data/_links_output.txt"
+
+submitted_pastes = []
 # There are filetypes that are not supported by certain pastebin services,
 # in such cases, we'd need to convert the filetype to a different one
 def get_file_type(config):
@@ -33,19 +34,15 @@ def read_pastes():
                 data[filetype].append(line)
             except:
                 continue
-    with open(path + STORED_PASTES_OUTPUT, 'w') as f:
-        for filetype in data:
-            try:
-                f.write(filetype)
-                f.write("\n")
-                for line in data[filetype]:
-                    f.write("  ")
-                    f.write(line["link"])
-                    f.write(", ")
-                    f.write(line["time"])
-                    f.write("\n")
-            except:
-                continue
+    submitted_pastes.clear()
+    for filetype in data:
+        try:
+            submitted_pastes.append(filetype)
+            for line in data[filetype]:
+                paste = "  " + line["link"] + ", " + line["time"]
+                submitted_pastes.append(paste)
+        except:
+            continue
 
 def save_pastes(link, file_type):
     path = vim.eval("s:path") + "/" + "../"
@@ -118,18 +115,17 @@ function s:post_text_visual()
 endfunction
 
 function s:load_saved_pastes()
-    if exists("g:pastebin_paste_list_on")
-        if g:pastebin_paste_list_on==1
-            pc
-            let g:pastebin_paste_list_on=0
-            return
-        endif
-    endif
     py3 read_pastes()
-    let l:path = s:path . "/../" . "data/_links_output.txt"
-    let command = "botr pedit +:setl\\ autoread\ " . fnameescape(l:path)
-    execute command
-    let g:pastebin_paste_list_on=1
+    let submitted_pastes = py3eval('submitted_pastes')
+
+    let counter = 0
+    new
+    for line in submitted_pastes
+        let counter += 1
+        call setline(counter, line)
+    endfor
+    set ro bt=nofile
+
 endfunction
 
 execute "command! PastebinPaste :call s:post_text_visual()"
