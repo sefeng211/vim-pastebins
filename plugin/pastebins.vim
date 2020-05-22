@@ -55,9 +55,16 @@ def save_pastes(link, file_type):
         f.write(json.dumps(data))
         f.write("\n");
 
-def post_text():
-    service = vim.eval("g:enabled_pastebin_service")
+def post_visual_text():
     content = vim.eval("s:get_visual_selection()")
+    post_text(content)
+
+def post_entire_buffer():
+    content = vim.eval("s:get_entire_buffer()")
+    post_text(content)
+
+def post_text(content):
+    service = vim.eval("g:enabled_pastebin_service")
     config = vim.eval("g:pastebin_services")
 
     try:
@@ -93,7 +100,7 @@ EOF
 let s:path = expand('<sfile>:p:h')
 
 " Credit of this function: https://stackoverflow.com/a/6271254
-function! s:get_visual_selection()
+function s:get_visual_selection()
     " Why is this not a built-in Vim script function?!
     let [line_start, column_start] = getpos("'<")[1:2]
     let [line_end, column_end] = getpos("'>")[1:2]
@@ -106,12 +113,17 @@ function! s:get_visual_selection()
     return join(lines, "\n")
 endfunction
 
+function! s:get_entire_buffer()
+    let buffer = join(getline(1, '$'), "\n")
+    return buffer
+endfunction
+
 function s:post_text_visual()
     if !has("python3")
         echo "vim has to be compiled with +python3 to run PastebinPaste"
         finish
     endif
-    py3 post_text()
+    py3 post_visual_text()
 endfunction
 
 function s:load_saved_pastes()
@@ -128,5 +140,10 @@ function s:load_saved_pastes()
 
 endfunction
 
+function s:post_entire_buffer()
+    py3 post_entire_buffer()
+endfunction
+
 execute "command! PastebinPaste :call s:post_text_visual()"
+execute "command! PastebinPasteAll :call s:post_entire_buffer()"
 execute "command! PastebinPasteList :call s:load_saved_pastes()"

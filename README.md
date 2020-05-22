@@ -9,6 +9,7 @@ Requirement
 Supported Feature
 -----------------
 - Paste current visual selection
+- Paste the entire buffer
 - List previously posted pastes
 
 Supported Pastebin Service
@@ -19,11 +20,14 @@ Supported Pastebin Service
 Usage
 -----
 - Paste Visual Selection
-`xnoremap <leader>ps :<C-U>PastebinPaste<cr>` - `<C-U>` is required to clear
-the `'<,'>` from the command.
+`<C-U>PastebinPaste` - `<C-U>` is required to clear the `'<,'>` from the command.
+
+- Paste the entire buffer
+`PastebinPasteAll`
 
 - List Previous Posted Pastes
-`nnoremap <leader>pl :PastebinPasteList<cr>`
+`PastebinPasteList`
+
 
 Customization
 -------------
