@@ -10,12 +10,10 @@ STORED_PASTES = "data/_links.txt"
 submitted_pastes = []
 # There are filetypes that are not supported by certain pastebin services,
 # in such cases, we'd need to convert the filetype to a different one
-def get_file_type(config):
-    file_type = vim.eval("&filetype")
-
+def get_file_type(config, file_type):
     if "filetype" in config:
         if file_type in config["filetype"]:
-           return config["file_type"][file_type]
+            return config["filetype"][file_type]
     return file_type
 
 # Helper function converts the stored pastes into a human readable format
@@ -59,6 +57,12 @@ def post_visual_text():
     content = vim.eval("s:get_visual_selection()")
     post_text(content)
 
+def post_data(url, data):
+    encoded_data = parse.urlencode(data).encode()
+    req =  request.Request(url, data=encoded_data)
+    resp = request.urlopen(req)
+    return resp.read().decode("utf-8")
+
 def post_entire_buffer():
     content = vim.eval("s:get_entire_buffer()")
     post_text(content)
@@ -79,22 +83,29 @@ def post_text(content):
 
     url = config["url"]
     syntax_field = config["syntax"]
-    file_type = get_file_type(config)
-    data = {
+    type = vim.eval("&filetype")
+    file_type = get_file_type(config, type)
+    original_data = {
         "content": content,
         syntax_field: file_type
     }
 
-    data = parse.urlencode(data).encode()
-    req =  request.Request(url, data=data)
     try:
-        resp = request.urlopen(req)
-        link = resp.read().decode("utf-8")
+        link = post_data(url, original_data)
         save_pastes(link, file_type)
         print(link)
     except Exception as e:
-        print("Failed to post the selection")
-        print(e)
+        # This is most likely that the syntax of the file
+        # is not supported, fallback to raw text
+        file_type = get_file_type(config, "text")
+        original_data[syntax_field] = file_type
+        try:
+            link = post_data(url, original_data)
+            print("Using raw text as the file type")
+            save_pastes(link, file_type)
+            print(link)
+        except Exception as e:
+            print("Failed to submit the paste")
 EOF
 
 let s:path = expand('<sfile>:p:h')
